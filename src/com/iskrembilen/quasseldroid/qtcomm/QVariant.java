@@ -51,9 +51,9 @@ public class QVariant<T extends Object>{
 	public QVariantType getType(){
 		return type;
 	}
-	public T getData() throws EmptyQVariantException {
+	public T getData() throws EmptyQVariantThrowable {
 		if (data == null)
-			throw new EmptyQVariantException();
+			throw new EmptyQVariantThrowable();
 			
 		return data;
 	}
@@ -70,7 +70,7 @@ public class QVariant<T extends Object>{
 		}
 		@SuppressWarnings("unchecked")
 		@Override
-		public QVariant<U> unserialize(QDataInputStream src, DataStreamVersion version) throws IOException, EmptyQVariantException{	    
+		public QVariant<U> unserialize(QDataInputStream src, DataStreamVersion version) throws IOException, EmptyQVariantThrowable{	    
 			int type = (int)src.readUInt(32);
 			if (version.getValue() < DataStreamVersion.Qt_4_0.getValue()) {
 				//FIXME: Implement?
@@ -157,21 +157,25 @@ public class QVariant<T extends Object>{
 		case Bool:
 			return data.toString();
 		case Map:
-			String ret = "( ";
+			StringBuilder ret = new StringBuilder("( ");
 			Map<Object, Object> map = (Map<Object, Object>)data;
-			for (Object key : map.keySet()) {
-				ret += key.toString() + " : " + map.get(key).toString() + ", ";
+			for (Map.Entry<Object, Object> element : map.entrySet()) {
+				ret.append(element.getKey().toString());
+				ret.append(" : ");
+				ret.append(element.getValue().toString());
+				ret.append(", ");
 			}
-			ret += " )";
-			return ret;
+			ret.append(" )");
+			return ret.toString();
 		case List:
-			String r = "( ";
 			List<Object> list = (List<Object>)data;
+			StringBuilder tmpR = new StringBuilder("( ");
 			for (Object o : list) {
-				r += o.toString() + ", ";
+				tmpR.append(o.toString());
+				tmpR.append(", ");
 			}
-			r += " )";
-			return r;
+			tmpR.append(" )");
+			return tmpR.toString();
 		case UserType:
 			return userTypeName + data;
 		default:

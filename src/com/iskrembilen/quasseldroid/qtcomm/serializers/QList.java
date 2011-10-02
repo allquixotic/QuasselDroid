@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.iskrembilen.quasseldroid.qtcomm.DataStreamVersion;
-import com.iskrembilen.quasseldroid.qtcomm.EmptyQVariantException;
+import com.iskrembilen.quasseldroid.qtcomm.EmptyQVariantThrowable;
 import com.iskrembilen.quasseldroid.qtcomm.QDataInputStream;
 import com.iskrembilen.quasseldroid.qtcomm.QDataOutputStream;
 import com.iskrembilen.quasseldroid.qtcomm.QMetaTypeRegistry;
@@ -45,7 +45,7 @@ public class QList<T> implements QMetaTypeSerializer<List<T>> {
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<T> unserialize(QDataInputStream stream, DataStreamVersion version)
-			throws IOException, EmptyQVariantException {
+			throws IOException, EmptyQVariantThrowable {
 		List<T> list = makeList();
 		int len = (int)stream.readUInt(32);
 		serializer = (QMetaTypeSerializer<T>)QMetaTypeRegistry.instance().getTypeForName(elementType).getSerializer();

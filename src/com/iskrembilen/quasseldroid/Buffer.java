@@ -40,7 +40,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	/**
 	 * Information object about this buffer, contains name, type of buffer etc
 	 */
-	private BufferInfo info;
+	private final BufferInfo info;
 	/**
 	 * List that holds all the Ircmessages we have gotten on this buffer.
 	 */
@@ -436,6 +436,31 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	@Override
 	public int compareTo(Buffer another) {
 		return BufferUtils.compareBuffers(this, another);
+	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((info == null) ? 0 : info.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Buffer other = (Buffer) obj;
+		if (info == null) {
+			if (other.info != null)
+				return false;
+		} else if (!(info.id == other.info.id))
+			return false;
+		return true;
 	}
 
 	public void setTemporarilyHidden(boolean temporarilyHidden) {

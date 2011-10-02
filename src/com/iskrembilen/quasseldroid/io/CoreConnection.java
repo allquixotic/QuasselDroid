@@ -67,7 +67,7 @@ import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.exceptions.UnsupportedProtocolException;
 import com.iskrembilen.quasseldroid.io.CustomTrustManager.NewCertificateException;
-import com.iskrembilen.quasseldroid.qtcomm.EmptyQVariantException;
+import com.iskrembilen.quasseldroid.qtcomm.EmptyQVariantThrowable;
 import com.iskrembilen.quasseldroid.qtcomm.QDataInputStream;
 import com.iskrembilen.quasseldroid.qtcomm.QDataOutputStream;
 import com.iskrembilen.quasseldroid.qtcomm.QMetaType;
@@ -76,7 +76,7 @@ import com.iskrembilen.quasseldroid.qtcomm.QVariant;
 import com.iskrembilen.quasseldroid.qtcomm.QVariantType;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 
-public class CoreConnection {
+public final class CoreConnection {
 
 	private static final String TAG = CoreConnection.class.getSimpleName();
 
@@ -252,12 +252,15 @@ public class CoreConnection {
 	public void sendMessage(int buffer, String message) {
 		if (message.charAt(0) == '/') {
 			String t[] = message.split(" ");
-
+			
 			message = t[0].toUpperCase();
 			if (t.length > 1){
+				StringBuilder tmpMsg = new StringBuilder(message);
 				for (int i=1; i<t.length; i++) {
-					message += ' ' + t[i];
+					tmpMsg.append(' ');
+					tmpMsg.append(t[i]);
 				}
+				message = tmpMsg.toString();
 			}
 		} else {
 			message = "/SAY " + message;
@@ -279,10 +282,10 @@ public class CoreConnection {
 
 	/**
 	 * Initiates a connection.
-	 * @throws EmptyQVariantException 
+	 * @throws EmptyQVariantThrowable 
 	 * @throws UnsupportedProtocolException 
 	 */
-	public void connect() throws UnknownHostException, IOException, GeneralSecurityException, CertificateException, NewCertificateException, EmptyQVariantException, UnsupportedProtocolException {	
+	public void connect() throws UnknownHostException, IOException, GeneralSecurityException, CertificateException, NewCertificateException, EmptyQVariantThrowable, UnsupportedProtocolException {	
 		// START CREATE SOCKETS
 		SocketFactory factory = (SocketFactory)SocketFactory.getDefault();
 		socket = (Socket)factory.createSocket(address, port);
@@ -556,9 +559,9 @@ public class CoreConnection {
 
 	/**
 	 * A convenience function to read a QVariantMap.
-	 * @throws EmptyQVariantException 
+	 * @throws EmptyQVariantThrowable 
 	 */
-	private Map<String, QVariant<?>> readQVariantMap() throws IOException, EmptyQVariantException {
+	private Map<String, QVariant<?>> readQVariantMap() throws IOException, EmptyQVariantThrowable {
 		// Length of this packet (why do they send this? noone knows!).
 		inStream.readUInt(32);
 		QVariant <Map<String, QVariant<?>>> v = (QVariant <Map<String, QVariant<?>>>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, inStream);
@@ -570,9 +573,9 @@ public class CoreConnection {
 
 	/**
 	 * A convenience function to read a QVariantList.
-	 * @throws EmptyQVariantException 
+	 * @throws EmptyQVariantThrowable 
 	 */	
-	private List<QVariant<?>> readQVariantList() throws IOException, EmptyQVariantException {	
+	private List<QVariant<?>> readQVariantList() throws IOException, EmptyQVariantThrowable {	
 		inStream.readUInt(32); // Length
 		QVariant <List<QVariant<?>>> v = (QVariant <List<QVariant<?>>>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, inStream);
 
@@ -631,7 +634,7 @@ public class CoreConnection {
 			
 			try {
 				doRun();
-			} catch (EmptyQVariantException e) {
+			} catch (EmptyQVariantThrowable e) {
 				service.getHandler().obtainMessage(R.id.LOST_CONNECTION, "Protocol error!").sendToTarget();
 				e.printStackTrace();
 				disconnect();
@@ -642,7 +645,7 @@ public class CoreConnection {
 			}
 		}
 
-		public void doRun() throws EmptyQVariantException {
+		public void doRun() throws EmptyQVariantThrowable {
 			this.running = true;
 
 			try {
@@ -674,7 +677,7 @@ public class CoreConnection {
 				service.getHandler().obtainMessage(R.id.LOST_CONNECTION, "Invalid username/password combination.").sendToTarget();
 				disconnect();
 				return;
-			} catch (EmptyQVariantException e) {
+			} catch (EmptyQVariantThrowable e) {
 				service.getHandler().obtainMessage(R.id.LOST_CONNECTION, "IO error while connecting!").sendToTarget();
 				e.printStackTrace();
 				disconnect();
@@ -781,10 +784,10 @@ public class CoreConnection {
 
 							ArrayList<IrcUser> ircUsers = new ArrayList<IrcUser>();
 
-							for (String nick : userObjs.keySet()) {
+							for (Map.Entry<String, QVariant<?>> element: userObjs.entrySet()) {
 								IrcUser user = new IrcUser();
-								user.name = nick;
-								Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) userObjs.get(nick).getData();
+								user.name = element.getKey();
+								Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) element.getValue().getData();
 								user.away = (Boolean) map.get("away").getData();
 								user.awayMessage = (String) map.get("awayMessage").getData();
 								user.ircOperator = (String) map.get("ircOperator").getData();
