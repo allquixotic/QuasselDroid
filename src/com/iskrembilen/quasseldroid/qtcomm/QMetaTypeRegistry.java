@@ -49,7 +49,7 @@ import com.iskrembilen.quasseldroid.qtcomm.serializers.quassel.NetworkServerSeri
 
 
 public class QMetaTypeRegistry {
-	final static QMetaTypeRegistry singleton = new QMetaTypeRegistry();
+	static QMetaTypeRegistry singleton = null;
 	List<QMetaType<?>> types = null;
 	Map<String,Integer> lookupName;
 	Map<Integer,Integer> lookupId;
@@ -167,6 +167,9 @@ public class QMetaTypeRegistry {
 		}
 	}
 	public static QMetaTypeRegistry instance(){
+		if(singleton==null){
+			singleton = new QMetaTypeRegistry();
+		}
 		return singleton;
 	}
 	public synchronized int getIdForName(String name){
@@ -187,10 +190,10 @@ public class QMetaTypeRegistry {
 		if(lookupName.containsKey(name)) return types.get(lookupName.get(name));
 		throw new IllegalArgumentException("Unable to find meta type: " + name);
 	}
-	public static Object unserialize(Type type,QDataInputStream stream, DataStreamVersion version) throws IOException, EmptyQVariantThrowable {
+	public static Object unserialize(Type type,QDataInputStream stream, DataStreamVersion version) throws IOException, EmptyQVariantException {
 		return instance().getTypeForId(type.getValue()).getSerializer().unserialize(stream, version);
 	}
-	public static Object unserialize(Type type,QDataInputStream stream) throws IOException, EmptyQVariantThrowable {
+	public static Object unserialize(Type type,QDataInputStream stream) throws IOException, EmptyQVariantException {
 		return unserialize(type, stream, DataStreamVersion.Qt_4_2);
 	}
 	@SuppressWarnings("unchecked")

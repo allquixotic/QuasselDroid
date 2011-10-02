@@ -143,7 +143,7 @@ public class CoreConnService extends Service {
 			
 			@Override
 			public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-				if(key.equals(getString(R.string.preference_colored_text))) {
+				if(key == getString(R.string.preference_colored_text)) {
 					preferenceParseColors = preferences.getBoolean(getString(R.string.preference_colored_text), false);
 				}	
 			}

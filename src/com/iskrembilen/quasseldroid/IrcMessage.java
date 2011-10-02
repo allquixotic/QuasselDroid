@@ -98,31 +98,8 @@ public class IrcMessage implements Comparable<IrcMessage>{
 	private ArrayList<String> urls = new ArrayList<String>();
 
 
-	@Override
 	public int compareTo(IrcMessage other) {
 		return ((Integer)messageId).compareTo((Integer)other.messageId);
-	}
-	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + messageId;
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		IrcMessage other = (IrcMessage) obj;
-		if (messageId != other.messageId)
-			return false;
-		return true;
 	}
 
 	public String toString() {

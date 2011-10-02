@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.iskrembilen.quasseldroid.qtcomm.DataStreamVersion;
-import com.iskrembilen.quasseldroid.qtcomm.EmptyQVariantThrowable;
+import com.iskrembilen.quasseldroid.qtcomm.EmptyQVariantException;
 import com.iskrembilen.quasseldroid.qtcomm.QDataInputStream;
 import com.iskrembilen.quasseldroid.qtcomm.QDataOutputStream;
 import com.iskrembilen.quasseldroid.qtcomm.QMetaTypeRegistry;
@@ -53,15 +53,15 @@ public class QMap<T, V> implements QMetaTypeSerializer<Map<T, V>> {
 		keySerializer = QMetaTypeRegistry.instance().getTypeForName(keyType).getSerializer();
 		valueSerializer = QMetaTypeRegistry.instance().getTypeForName(valueType).getSerializer();
 
-		for (Map.Entry<T, V> element : data.entrySet()) {
-			keySerializer.serialize(stream, element.getKey(), version);
-			valueSerializer.serialize(stream, element.getValue(), version);
+		for (T key : data.keySet()) {
+			keySerializer.serialize(stream, key, version);
+			valueSerializer.serialize(stream, data.get(key), version);
 		}
 	}
 
 	@Override
 	public Map<T, V> unserialize(QDataInputStream stream,
-			DataStreamVersion version) throws IOException, EmptyQVariantThrowable {
+			DataStreamVersion version) throws IOException, EmptyQVariantException {
 		
 		Map map = new HashMap<String, T>();
 		keySerializer = QMetaTypeRegistry.instance().getTypeForName(keyType).getSerializer();
